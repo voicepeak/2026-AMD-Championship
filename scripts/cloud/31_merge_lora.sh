@@ -7,11 +7,16 @@ source "$HERE/env.sh"
 
 STEPS="${1:-100}"
 NGPU="${2:-8}"
-RUN_NAME="lora_${STEPS}steps_${NGPU}gpu"
+RUN_NAME="${RUN_NAME:-lora_${STEPS}steps_${NGPU}gpu}"
 OUT="${OUT_DIR}/${RUN_NAME}"
 CKPT="${OUT}/checkpoints/global_step_${STEPS}"
 MERGED="${OUT}/merged_checkpoint/global_step_${STEPS}/hf_ckpt"
 BASE_MODEL="${ROBOTWIN_ROOT}/experiments/lingbot_vla_v2_6b_robotwin/models/robbyant_lingbot-vla-v2-6b"
+
+[[ "$STEPS" =~ ^[1-9][0-9]*$ ]] || { echo "[merge] steps 必须是正整数: $STEPS" >&2; exit 2; }
+case "$NGPU" in 4|8) ;; *) echo "[merge] GPU 数只支持 4 或 8: $NGPU" >&2; exit 2 ;; esac
+[[ -d "$BASE_MODEL" ]] || { echo "[merge] 找不到基础模型: $BASE_MODEL" >&2; exit 2; }
+[[ ! -e "$MERGED" ]] || { echo "[merge] 输出已存在，请换 RUN_NAME 或先处理旧产物: $MERGED" >&2; exit 2; }
 
 if [ ! -d "$CKPT" ]; then
   echo "[merge] 找不到 checkpoint: $CKPT" >&2
@@ -19,9 +24,8 @@ if [ ! -d "$CKPT" ]; then
 fi
 
 cd "${ROBOTWIN_ROOT}"
-source /opt/robotwin-env/bin/activate
 
-python experiments/lingbot_vla_v2_6b_robotwin/scripts/merge_lora_dcp.py \
+"${LINGBOT_VLA_PYTHON}" experiments/lingbot_vla_v2_6b_robotwin/scripts/merge_lora_dcp.py \
   --checkpoint "$CKPT" \
   --training-output "$OUT" \
   --base-model "$BASE_MODEL" \

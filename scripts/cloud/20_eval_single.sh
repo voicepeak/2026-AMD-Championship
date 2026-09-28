@@ -13,13 +13,27 @@ TASK_CONFIG="${2:-demo_clean}"
 TEST_NUM="${3:-10}"
 PORT_ARG="${4:-$PORT}"
 
+case "$TASK_CONFIG" in
+  demo_clean|demo_randomized) ;;
+  *) echo "[eval] task config 必须是 demo_clean 或 demo_randomized: $TASK_CONFIG" >&2; exit 2 ;;
+esac
+[[ "$TEST_NUM" =~ ^[1-9][0-9]*$ ]] || { echo "[eval] episodes 必须是正整数: $TEST_NUM" >&2; exit 2; }
+[[ "$PORT_ARG" =~ ^[0-9]+$ ]] && (( PORT_ARG >= 1 && PORT_ARG <= 65535 )) || {
+  echo "[eval] 端口无效: $PORT_ARG" >&2
+  exit 2
+}
+
 echo "[eval] task=$TASK config=$TASK_CONFIG episodes=$TEST_NUM port=$PORT_ARG"
 echo "[eval] 请确保模型 server 已在 port $PORT_ARG 运行"
 
-cd "${ROBOTWIN_ROOT}"
-source /opt/robotwin-env/bin/activate
+if ! curl -fsS --max-time 2 "http://127.0.0.1:${PORT_ARG}/healthz" >/dev/null; then
+  echo "[eval] server 健康检查失败: http://127.0.0.1:${PORT_ARG}/healthz" >&2
+  exit 2
+fi
 
-python scripts/eval_policy_xpolicylab.py \
+cd "${ROBOTWIN_ROOT}"
+
+"${LINGBOT_VLA_PYTHON}" scripts/eval_policy_xpolicylab.py \
   --task_name "$TASK" \
   --task_config "$TASK_CONFIG" \
   --policy_name LingBot-VLA-v2 \

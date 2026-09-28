@@ -18,7 +18,8 @@ bash 20_eval_single.sh adjust_bottle demo_clean 10    #    OK 后跑 10 个
 
 # 3. 训练（会占满 GPU，先停掉 server）
 bash 30_train_lora.sh 100 8                 # 冒烟
-bash 30_train_lora.sh 1000 8                # 正式
+bash 30_train_lora.sh 1000 8                # 正式（上游配置）
+# T2 配置生成后：bash 30_train_lora.sh 1000 8 ~/challenge/configs/lora_1000_8gpu.yaml
 bash 31_merge_lora.sh 1000 8                # 合并 LoRA
 
 # 4. 全量评测（约 15h/8卡，19h/4卡）
@@ -42,7 +43,7 @@ bash 40_benchmark_full.sh 8 both100x10_lora_1000 "/workspace/runtime/outputs/lor
 脚本支持用环境变量覆盖：
 
 ```bash
-GPUS=4 PORT=13402 bash 10_launch_server.sh 4 13402
+PORT=13402 bash 10_launch_server.sh 0 13402
 EPISODES=5 bash 40_benchmark_full.sh 8 debug_run
 ```
 

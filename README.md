@@ -30,7 +30,8 @@ LingBot-VLA-Challenge/
 │   ├── 03-amd-compute.md  # AMD 算力申请流程
 │   ├── 04-cloud-runbook.md# 云端实例操作手册（命令）
 │   ├── 05-pitfalls.md     # 已知坑与排查
-│   └── 06-resources.md    # 资源链接汇总
+│   ├── 06-resources.md    # 资源链接汇总
+│   └── 07-upstream-parity.md # 上游版本、路径和参数逐项对照
 ├── configs/               # 我们的训练/评测配置（覆盖官方）
 ├── patches/               # 对上游仓库的补丁
 ├── experiments/           # 每次实验的记录（复制 _TEMPLATE.md）

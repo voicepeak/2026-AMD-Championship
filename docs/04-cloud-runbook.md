@@ -13,6 +13,7 @@
 | RoboTwin | `266f3aadf505a4f7fe9af0faa41a20f5f47cd123` |
 | XPolicyLab | `c37109c500be67d0dea6b36bf7337bbd26e763cd` |
 | LingBot-VLA-v2 | `951475ae1b1d87553e7dc47c97b53a3d695c0d13` |
+| AMD 复现仓库（本次核对） | `27b2f6fcb6c715e2cbb6db4431381f87c94b86ed` |
 | PyTorch / ROCm | 2.9.1 / 7.2.1 |
 | LeRobot | 0.6.0 |
 | FlashAttention2 | 2.8.4 |
@@ -68,11 +69,13 @@ export LINGBOT_VLA_SOURCE=/RoboTwin/experiments/lingbot_vla_v2_6b_robotwin/sourc
 export QWEN3VL_PATH=/RoboTwin/experiments/lingbot_vla_v2_6b_robotwin/models/Qwen3-VL-4B-Instruct-config-tokenizer
 export LINGBOT_VLA_PYTHON=/opt/robotwin-env/bin/python
 export HF_LEROBOT_HOME=/RoboTwin/data/lerobot
+export HF_HOME=/workspace/runtime/.cache/huggingface
 export ROBOTWIN_DISABLE_CUROBO=1
 export ROBOTWIN_EE_PLANNER=mplib
 export PYOPENGL_PLATFORM=egl
 export AITER_TRITON_ONLY=1
 export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
 export PYTHONPATH=/opt/aiter${PYTHONPATH:+:${PYTHONPATH}}
 ```
 
@@ -82,29 +85,13 @@ export PYTHONPATH=/opt/aiter${PYTHONPATH:+:${PYTHONPATH}}
 ## 4. 环境自检
 
 ```bash
-# Git commit 应匹配固定版本
-cd /RoboTwin
-git rev-parse HEAD
-git -C XPolicyLab rev-parse HEAD
-git -C experiments/lingbot_vla_v2_6b_robotwin/source/lingbot-vla-v2 rev-parse HEAD
-
-# Python 栈与 GPU
-/opt/robotwin-env/bin/python - <<'PY'
-import aiter, flash_attn, torch, triton
-import open3d, sapien, mplib, lerobot
-print(torch.__version__, torch.version.hip)
-print("Triton:", triton.__version__, "FA2:", flash_attn.__version__)
-print("GPU count:", torch.cuda.device_count())
-assert torch.cuda.is_available()
-assert flash_attn.__version__ == "2.8.4"
-x = torch.randn(1024, 1024, device="cuda"); print((x @ x).shape)
-PY
-
-# 数据自检（50 个任务）
-test "$(find /RoboTwin/data/demo_clean -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 50
-test "$(find /RoboTwin/data/lerobot -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 50
-test "$(wc -l </RoboTwin/data/robotwin_demo_clean_joint_v30.txt)" -eq 50
+cd ~/challenge/scripts/cloud
+bash 00_check_env.sh
 ```
+
+该脚本会硬检查 3 个固定 commit、4/8 张 GPU、FlashAttention 2.8.4、50 个 clean
+任务、50 行 clean 训练清单、训练清单不含 randomized，以及所有推理/训练入口。任何
+`[FAIL]` 都会以非零状态退出，修复后再继续。
 
 ## 5. 启动官方模型 server + 推理验证
 
@@ -160,7 +147,7 @@ python experiments/lingbot_vla_v2_6b_robotwin/scripts/run_clean_benchmark.py \
 ```
 
 八卡（约 15h12m）：把 `--gpu-count 8`、`--run-name both100x10_8gpu`。
-- 支持 `--resume` 跳过 `done/<task>.done` 已完成任务
+- 支持 `--resume` 跳过 `done/<task_config>__<task>.done` 已完成任务
 - 全部完成后检查日志里的 `Final success rate`
 
 | 机器 | 配置 | 任务/回合 | 墙钟时间 |
@@ -196,6 +183,8 @@ python -m torch.distributed.run --standalone --nproc-per-node=4 \
 - **不要**直接调用 PATH 里的 `torchrun`（可能绑错 Python）
 - `HIP_VISIBLE_DEVICES` 数量必须等于 `--nproc-per-node`
 - LoRA 若用 8 卡：`data_parallel_shard_size 8`、`global_batch_size 8`、`nproc-per-node 8`
+- 封装脚本支持第三个参数传入派生配置：
+  `bash 30_train_lora.sh 1000 8 ~/challenge/configs/lora_1000_8gpu.yaml`
 
 ### 8.2 合并 LoRA 并重新推理
 ```bash

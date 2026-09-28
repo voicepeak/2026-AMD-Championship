@@ -13,24 +13,46 @@ RUN_NAME="${2:-both100x10_${NGPU}gpu}"
 MODEL_PATH="${3:-}"
 EPISODES="${EPISODES:-10}"
 
+case "$NGPU" in 4|8) ;; *) echo "[bench] GPU 数只支持 4 或 8: $NGPU" >&2; exit 2 ;; esac
+[[ "$EPISODES" =~ ^[1-9][0-9]*$ ]] || { echo "[bench] EPISODES 必须是正整数: $EPISODES" >&2; exit 2; }
+[[ "$PORT" =~ ^[0-9]+$ ]] && (( PORT >= 1 && PORT + NGPU - 1 <= 65535 )) || {
+  echo "[bench] 起始端口无效: $PORT" >&2
+  exit 2
+}
+if [[ -n "$MODEL_PATH" ]]; then
+  [[ -d "$MODEL_PATH" ]] || { echo "[bench] 找不到模型目录: $MODEL_PATH" >&2; exit 2; }
+  [[ -f "$MODEL_PATH/lingbotvla_cli.yaml" ]] || {
+    echo "[bench] 找不到模型推理配置: $MODEL_PATH/lingbotvla_cli.yaml" >&2
+    exit 2
+  }
+fi
+
+for ((gpu = 0; gpu < NGPU; gpu++)); do
+  port=$((PORT + gpu))
+  if ss -H -ltn "sport = :${port}" 2>/dev/null | grep -q .; then
+    echo "[bench] 端口 ${port} 已占用；先停止现有模型 server" >&2
+    exit 2
+  fi
+done
+
 echo "[bench] gpus=$NGPU run=$RUN_NAME episodes=$EPISODES"
 echo "[bench] 预计墙钟时间：8 卡 ~15h，4 卡 ~19h"
 
 cd "${ROBOTWIN_ROOT}"
-source /opt/robotwin-env/bin/activate
 
 if [ -n "$MODEL_PATH" ]; then
-  export ROBOTWIN_CHECKPOINT="$MODEL_PATH"
   export LINGBOTVLA_TRAINING_CONFIG="${MODEL_PATH}/lingbotvla_cli.yaml"
   echo "[bench] model path: $MODEL_PATH"
-  python experiments/lingbot_vla_v2_6b_robotwin/scripts/run_clean_benchmark.py \
+  "${LINGBOT_VLA_PYTHON}" experiments/lingbot_vla_v2_6b_robotwin/scripts/run_clean_benchmark.py \
     --gpu-count "$NGPU" --episodes "$EPISODES" \
+    --task-config both \
     --model-path "$MODEL_PATH" \
     --expert-check --accept-expert-info-on-failure --no-video \
     --run-name "$RUN_NAME" --runtime-dir "${LINGBOT_RUNTIME}" --resume
 else
-  python experiments/lingbot_vla_v2_6b_robotwin/scripts/run_clean_benchmark.py \
+  "${LINGBOT_VLA_PYTHON}" experiments/lingbot_vla_v2_6b_robotwin/scripts/run_clean_benchmark.py \
     --gpu-count "$NGPU" --episodes "$EPISODES" \
+    --task-config both \
     --expert-check --accept-expert-info-on-failure --no-video \
     --run-name "$RUN_NAME" --runtime-dir "${LINGBOT_RUNTIME}" --resume
 fi

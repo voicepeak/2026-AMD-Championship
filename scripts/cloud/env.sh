@@ -13,6 +13,7 @@ export QWEN3VL_PATH="${ROBOTWIN_ROOT}/experiments/lingbot_vla_v2_6b_robotwin/mod
 export LINGBOT_VLA_PYTHON="/opt/robotwin-env/bin/python"
 export ROBOTWIN_MODEL_ROOT="${ROBOTWIN_MODEL_ROOT:-/models/robotwin-persistent/models}"
 export HF_LEROBOT_HOME="${ROBOTWIN_ROOT}/data/lerobot"
+export HF_HOME="${HF_HOME:-${LINGBOT_RUNTIME}/.cache/huggingface}"
 
 # 环境（AMD 环境用 MPLib 替代 CuRobo）
 export ROBOTWIN_DISABLE_CUROBO=1
@@ -22,6 +23,7 @@ export PYOPENGL_PLATFORM=egl
 # ROCm / Triton
 export AITER_TRITON_ONLY=1
 export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
+export SETUPTOOLS_SCM_PRETEND_VERSION="${SETUPTOOLS_SCM_PRETEND_VERSION:-0.0.0}"
 export PYTHONPATH="/opt/aiter${PYTHONPATH:+:${PYTHONPATH}}"
 
 # 默认端口与卡数（脚本可用环境变量覆盖）
