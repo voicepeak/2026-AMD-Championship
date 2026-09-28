@@ -33,3 +33,13 @@ git -C /RoboTwin apply /path/to/patches/xxx.patch
 - 官方镜像已包含若干兼容补丁（MPLib 规划、SAPIEN denoiser 关闭、norm 路径修复等），
   这些**不用**我们再打
 - 只记录**我们自己**新增的改动
+
+## 已保存的第三方补丁（带出处）
+
+| 文件 | 来源 | 作用 |
+|---|---|---|
+| `amd-lingbot-vla-v2-rocm.patch` | AMD 官方仓库 `ZiguanWang/Robotwin-radeon-cloud` `docker/patches/` | **LoRA 支持**（上游 951475ae 没有）、空列表解析修复、LeRobot 0.6 兼容、推理端修复 |
+
+> 该补丁同时用于 CUDA 与 ROCm。CUDA 上跑 LoRA **必须**先应用它，
+> 否则报 `Some specified arguments are not used by the ArgumentParser: ['--train.use_lora' ...]`。
+> 见 `docs/10-cuda-lora-run.md`。

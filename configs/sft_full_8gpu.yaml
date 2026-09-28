@@ -73,7 +73,8 @@ data:
 model:
   adanorm_time: true
   attn_implementation: flash_attention_2
-  basic_modules: []
+  # 空列表必须写 null（上游 parse_args 对 [] 会生成无值参数导致 argparse 报错）
+  basic_modules: null
   config_key: LingbotVLAV2Config
   config_path: /RoboTwin/experiments/lingbot_vla_v2_6b_robotwin/models/robbyant_lingbot-vla-v2-6b
   decoders: {}
@@ -217,7 +218,7 @@ train:
   module_fsdp_enable: true
   moe_monitor_interval: 1000
   muon_adjust_lr_fn: match_rms_adamw
-  muon_exclude_name_patterns: []
+  muon_exclude_name_patterns: null
   muon_momentum: 0.95
   muon_nesterov: true
   muon_ns_steps: 5

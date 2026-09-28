@@ -33,7 +33,8 @@ LingBot-VLA-Challenge/
 │   ├── 06-resources.md    # 资源链接汇总
 │   ├── 07-upstream-parity.md # 上游版本、路径和参数逐项对照
 │   ├── 08-training-plan.md   # 训练方案（LoRA vs SFT、排期、验证子集）
-│   └── 09-4090-debug-env.md  # 4090 / CUDA 调试环境搭建
+│   ├── 09-4090-debug-env.md  # 4090 / CUDA 调试环境搭建
+│   └── 10-cuda-lora-run.md   # CUDA 上跑 LoRA 全量的 runbook
 ├── configs/               # 派生训练配置（lora_1000_8gpu / sft_full_8gpu）
 ├── patches/               # 对上游仓库的补丁
 ├── experiments/           # 每次实验的记录（复制 _TEMPLATE.md）
