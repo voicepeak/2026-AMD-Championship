@@ -1,0 +1,53 @@
+# ===== 大文件 / 产物（不入库）=====
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.onnx
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.h5
+*.hdf5
+*.mp4
+*.avi
+*.mov
+*.png
+*.jpg
+*.jpeg
+
+# 数据与模型目录（只保留 README/清单）
+data/**
+models/**
+checkpoints/**
+outputs/**
+*.log
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ===== 编辑器 / 系统 =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 本地私有配置（含服务器地址/密钥）=====
+.env
+*.local
+scripts/local/*.secret.ps1
+secrets/
+
+# 例外：允许提交 results 下的小型 JSON/摘要
+!results/*.json
+!results/*.md
