@@ -1,4 +1,4 @@
-# 复制此文件为 config.secret.ps1 并填入你的实例信息
+﻿# 复制此文件为 config.secret.ps1 并填入你的实例信息
 # config.secret.ps1 已被 .gitignore 忽略，不会入库
 
 $Config = @{

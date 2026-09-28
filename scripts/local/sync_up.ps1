@@ -1,4 +1,4 @@
-# 把 scripts/cloud 和 configs 上传到云端实例
+﻿# 把 scripts/cloud 和 configs 上传到云端实例
 # 用法：powershell -File scripts\local\sync_up.ps1
 $ErrorActionPreference = "Stop"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path

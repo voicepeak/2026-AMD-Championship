@@ -60,50 +60,32 @@
 
 ---
 
-## 4. Agent 现在就能做的（**无需算力**，本地/网络即可）
+## 4. 无需算力的任务（T1–T8）
 
-> 原则：**能验证的才算完成**。每项都给出验收标准（DoD）。完成后更新 `experiments/` 或对应文档。
-> 优先级 P0 > P1 > P2。
+> 状态：**T1–T7 已完成**（T1 由 Codex 完成；T2–T7 由 opencode 完成，2026-09-28）。T8 为可选，未做。
 
-### P0 · 对齐上游，消除 runbook 与真实脚本的偏差
-- **T1｜核对并补全训练/评测参数**（✅ 2026-09-28 完成，见 `docs/07-upstream-parity.md`）
-  - 抓取上游 `Robbyant/lingbot-vla-v2`：`configs/vla/Training_Config.md`、
-    `configs/vla/robotwin/*.yaml`、`configs/robot_configs/robotwin.yaml`、
-    `lingbotvla/data/vla_data/README.md`
-  - 抓取 `ZiguanWang/Robotwin-radeon-cloud`：`docker/`、
-    `experiments/lingbot_vla_v2_6b_robotwin/scripts/*`、`training/*`
-  - 核对 `scripts/cloud/*.sh` 与 `docs/04-cloud-runbook.md` 里的**路径、参数名、脚本名**是否与实际一致，不一致就改
-  - DoD：产出一份 `docs/07-upstream-parity.md`（逐条对照表：我们的写法 vs 上游实际），并把 `scripts/cloud` 修正到可直接跑
-- **T2｜产出派生训练配置**
-  - 基于上游 robotwin 配置，写 `configs/lora_1000_8gpu.yaml`、`configs/sft_full_8gpu.yaml`（含注释：相对上游改了什么）
-  - DoD：每个 yaml 顶部写清目的/改动/对应实验；能被 `30_train_lora.sh` 正确引用
+| 任务 | 内容 | 状态 | 产物 |
+|---|---|---|---|
+| T1 | 上游对齐、修正云端脚本 | ✅ | `docs/07-upstream-parity.md`、`scripts/cloud/*` |
+| T2 | 派生训练配置 | ✅ | `configs/lora_1000_8gpu.yaml`、`configs/sft_full_8gpu.yaml` |
+| T3 | benchmark 结果汇总 | ✅ | `scripts/local/summarize_benchmark.ps1`（样例验证通过） |
+| T4 | 实验总表 | ✅ | `scripts/local/report_experiments.ps1`（样例验证通过） |
+| T5 | 50 任务清单 + 验证子集 | ✅ | `data/manifests/robotwin_tasks.{md,txt}` |
+| T6 | 训练方案 | ✅ | `docs/08-training-plan.md` |
+| T7 | 提交物 checklist | ✅ | `submission/CHECKLIST.md` |
+| T8 | 本地只读镜像上游代码 | ⬜ 可选 | （未做，按需再做） |
 
-### P1 · 工具：让"评测 → 结论"自动化
-- **T3｜benchmark 结果汇总脚本**
-  - 写 `scripts/local/summarize_benchmark.ps1`：解析 `results/<run>/` 下日志里的
-    `Final success rate`，输出 clean/randomized 总成功率并写入 `results/<run>/SUMMARY.md`
-  - DoD：对一份**样例日志**能跑出正确表格（自己造样例验证）
-- **T4｜实验总表生成**
-  - 写 `scripts/local/report_experiments.ps1`：扫描 `results/*/SUMMARY.md` → 生成 `results/OVERVIEW.md`
-  - DoD：≥2 个 run 时表格正确
-- **T5｜任务清单**
-  - 从 RoboTwin 2.0 抓取 50 任务名，生成 `data/manifests/robotwin_tasks.md`，
-    并**标出 8–10 个推荐验证子集**（快、有代表性，用于小规模选点）
-  - DoD：清单与官方一致，子集有理由说明
+补充产物：`docs/09-4090-debug-env.md`（CUDA 调试环境搭建步骤）。
 
-### P2 · 方案与提交物
-- **T6｜训练方案文档**
-  - 写 `docs/08-training-plan.md`：LoRA vs 全参数 SFT 权衡、超参建议、验证子集策略、
-    按 `docs/02` 的时间预算表（含"一次全量 15–19h"的排期）
-  - DoD：给出**明确推荐**（默认走哪条）与备选
-- **T7｜初赛提交物模板**
-  - 建 `submission/` + `submission/CHECKLIST.md`（按官方要求的材料清单，待官方细则补充）
-  - DoD：清单可勾选，说明每项怎么产出
+### 接下来仍需人工 / 算力的事
 
-### 可选
-- **T8｜本地只读镜像上游代码** 到 `third_party/`（**不入库**，仅便于 grep 与 ctrl-F 查阅）
+1. （人在 4090）用验证子集跑一次 LoRA 冒烟：`bash scripts/cloud/30_train_lora.sh 100 8 configs/lora_1000_8gpu.yaml`
+2. （算力）下载全量 50 任务数据 + 仿真资产
+3. （算力）baseline 单任务闭环 → 记录到 `experiments/`
+4. （算力）正式训练：`configs/lora_1000_8gpu.yaml`（保底）→ `configs/sft_full_8gpu.yaml`（冲分）
 
-> Agent 注意：`docs/` 文档要用**中文**，代码注释保持简洁；`.sh` 必须 LF（`.gitattributes` 已配）。
+> Agent 注意：`docs/` 文档用**中文**；`.sh` 必须 LF（`.gitattributes` 已配）；
+> **`.ps1` 必须保存为 UTF-8 with BOM**，否则 Windows PowerShell 5.1 会乱码解析失败。
 
 ---
 
@@ -171,3 +153,5 @@ T1（上游对齐）→ T2（派生配置）→ T3/T4（结果汇总工具）→
 | 2026-09-28 | 建立工作区；新增本交接文档 |
 | 2026-09-28 | 明确算力方案：AMD 主力，4090 仅调试；实例实测为 48GB |
 | 2026-09-28 | 4090 48GB 调试实例就绪：PyTorch/FlashAttention、clean 数据转换、基础权重与 fused MoE 验证通过 |
+| 2026-09-28 | 完成 T2–T7：派生配置、结果汇总工具、任务清单、训练方案、提交 checklist；新增 `docs/08`、`docs/09` |
+| 2026-09-28 | 约定：本地 `.ps1` 必须 UTF-8 with BOM，已对全部脚本生效 |

@@ -27,6 +27,10 @@ checkpoints/**
 outputs/**
 *.log
 
+# 例外：允许提交数据清单
+!data/manifests/
+!data/manifests/**
+
 # 上游只读镜像（仅供本地对照，不入库）
 third_party/
 

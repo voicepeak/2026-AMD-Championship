@@ -12,6 +12,13 @@
 | 归一化统计 | 上游 `assets/norm_stats/robotwin.json` |
 | 官方后训练示例 | 上游 `configs/vla/robotwin/*.yaml`（Muon / dist_muon） |
 
+## 本仓库已有的派生配置
+
+| 文件 | 用途 | 基线 | 关键改动 |
+|---|---|---|---|
+| `lora_1000_8gpu.yaml` | LoRA 后训练，8 卡 1000 步 | AMD `lingbotvla_cli.yaml` | shard=8、累积=1、global=8、max/save=1000 |
+| `sft_full_8gpu.yaml` | 全参数 SFT，8 卡，含 depth/video teacher | AMD `lingbotvla_cli.yaml` | use_lora=false、micro=16、global=256、累积=2、align_params 全 teacher |
+
 ## 命名约定
 
 - `lora_<steps>_<gpu>.yaml` —— LoRA 实验配置

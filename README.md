@@ -31,14 +31,18 @@ LingBot-VLA-Challenge/
 │   ├── 04-cloud-runbook.md# 云端实例操作手册（命令）
 │   ├── 05-pitfalls.md     # 已知坑与排查
 │   ├── 06-resources.md    # 资源链接汇总
-│   └── 07-upstream-parity.md # 上游版本、路径和参数逐项对照
-├── configs/               # 我们的训练/评测配置（覆盖官方）
+│   ├── 07-upstream-parity.md # 上游版本、路径和参数逐项对照
+│   ├── 08-training-plan.md   # 训练方案（LoRA vs SFT、排期、验证子集）
+│   └── 09-4090-debug-env.md  # 4090 / CUDA 调试环境搭建
+├── configs/               # 派生训练配置（lora_1000_8gpu / sft_full_8gpu）
 ├── patches/               # 对上游仓库的补丁
 ├── experiments/           # 每次实验的记录（复制 _TEMPLATE.md）
+├── data/manifests/        # RoboTwin 50 任务清单与验证子集
+├── submission/            # 初赛提交物 checklist
 ├── results/               # 从云端拉回的评测结果（小文件）
 └── scripts/
     ├── cloud/             # 在 Radeon Cloud 实例里执行的脚本
-    └── local/             # 本地管理脚本（同步/打包）
+    └── local/             # 本地管理脚本（同步/汇总）
 ```
 
 ## 快速开始

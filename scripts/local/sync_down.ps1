@@ -1,4 +1,4 @@
-# 从云端实例拉回评测/训练结果（只拉小文件：json / md / 日志摘要 / txt）
+﻿# 从云端实例拉回评测/训练结果（只拉小文件：json / md / 日志摘要 / txt）
 # 用法：powershell -File scripts\local\sync_down.ps1 [run-name]
 #   例：powershell -File scripts\local\sync_down.ps1 both100x10_8gpu
 param(
@@ -17,7 +17,7 @@ $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $dest = if ($RunName) { Join-Path $root "results\$RunName" } else { Join-Path $root "results\inbox_$stamp" }
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
-Write-Host "[down] 拉取 $target:$remote -> $dest" -ForegroundColor Cyan
+Write-Host "[down] 拉取 ${target}:$remote -> $dest" -ForegroundColor Cyan
 
 # 评测结果目录
 scp -P $port -r "${target}:$remote/eval_result" "$dest\"
